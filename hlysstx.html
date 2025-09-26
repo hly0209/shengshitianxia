@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>盛世天下 - 智能体聊天</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "SimSun", "FangSong", serif;
+        }
+        
+        body {
+            background-image: url('images/网页底图.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            width: 100%;
+        }
+        
+        .title {
+            text-align: center;
+            padding: 30px 0;
+            color: #8B4513;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            background: rgba(255,255,255,0.7);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 2px solid #DAA520;
+        }
+        
+        .main-content {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .character-selection {
+            flex: 1;
+            min-width: 250px;
+            background: rgba(255,255,255,0.85);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid #DAA520;
+        }
+        
+        .character-selection h2 {
+            text-align: center;
+            color: #8B4513;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+        
+        .character-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .character-card {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: linear-gradient(135deg, #FFF8DC 0%, #FFF0F5 100%);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .character-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-color: #DAA520;
+        }
+        
+        .character-card.active {
+            border-color: #CD5C5C;
+            background: linear-gradient(135deg, #FFF0F5 0%, #FFD700 100%);
+        }
+        
+        .character-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #DAA520;
+        }
+        
+        .character-info {
+            flex: 1;
+        }
+        
+        .character-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #8B0000;
+            margin-bottom: 5px;
+        }
+        
+        .character-title {
+            font-size: 0.9rem;
+            color: #8B4513;
+            font-style: italic;
+        }
+        
+        .chat-container {
+            flex: 3;
+            min-width: 300px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            border: 2px solid #DAA520;
+        }
+        
+        .chat-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #DAA520;
+            margin-bottom: 20px;
+        }
+        
+        .current-character-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #DAA520;
+        }
+        
+        .current-character-info h3 {
+            font-size: 1.5rem;
+            color: #8B0000;
+        }
+        
+        .current-character-info p {
+            font-size: 1rem;
+            color: #8B4513;
+            font-style: italic;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            margin-bottom: 20px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 10px;
+            border: 1px solid #DAA520;
+            max-height: 500px;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .message-user {
+            align-items: flex-end;
+        }
+        
+        .message-ai {
+            align-items: flex-start;
+        }
+        
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 5px;
+            border: 2px solid #DAA520;
+        }
+        
+        .message-content {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            word-wrap: break-word;
+            line-height: 1.5;
+        }
+        
+        .message-user .message-content {
+            background: linear-gradient(135deg, #E6E6FA 0%, #DDA0DD 100%);
+            border-bottom-right-radius: 5px;
+            color: #483D8B;
+        }
+        
+        .message-ai .message-content {
+            background: linear-gradient(135deg, #F0FFF0 0%, #98FB98 100%);
+            border-bottom-left-radius: 5px;
+            color: #2F4F4F;
+        }
+        
+        .input-area {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 10px;
+            border: 1px solid #DAA520;
+        }
+        
+        #message-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #DAA520;
+            border-radius: 25px;
+            font-size: 1rem;
+            resize: none;
+            min-height: 50px;
+            max-height: 150px;
+            background: rgba(255,255,255,0.9);
+            color: #333;
+        }
+        
+        #message-input:focus {
+            outline: none;
+            border-color: #CD5C5C;
+        }
+        
+        #send-button {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #CD5C5C 0%, #8B0000 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        
+        #send-button:hover {
+            background: linear-gradient(135deg, #8B0000 0%, #CD5C5C 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        #send-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            color: #8B4513;
+        }
+        
+        .loading::after {
+            content: "...";
+            animation: loading 1s infinite;
+        }
+        
+        @keyframes loading {
+            0% { content: "."; }
+            33% { content: ".."; }
+            66% { content: "..."; }
+        }
+        
+        /* 滚动条美化 */
+        .chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #DAA520;
+            border-radius: 10px;
+        }
+        
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #CD5C5C;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .character-card {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .message-content {
+                max-width: 85%;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">盛世天下</div>
+        
+        <div class="main-content">
+            <div class="character-selection">
+                <h2>选择对话对象</h2>
+                <div class="character-list">
+                    <div class="character-card" data-id="litai">
+                        <img src="images/李泰.jpg" alt="李泰" class="character-avatar">
+                        <div class="character-info">
+                            <div class="character-name">李泰</div>
+                            <div class="character-title">魏王 - 野心勃勃的皇子</div>
+                        </div>
+                    </div>
+                    
+                    <div class="character-card" data-id="lizhi">
+                        <img src="images/李治.jpg" alt="李治" class="character-avatar">
+                        <div class="character-info">
+                            <div class="character-name">李治</div>
+                            <div class="character-title">晋王 - 温润如玉的皇子</div>
+                        </div>
+                    </div>
+                    
+                    <div class="character-card" data-id="gaoyang">
+                        <img src="images/高阳公主.jpg" alt="高阳公主" class="character-avatar">
+                        <div class="character-info">
+                            <div class="character-name">高阳公主</div>
+                            <div class="character-title">叛逆贵胄 - 敢爱敢恨</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-container">
+                <div class="chat-header">
+                    <img id="current-avatar" src="images/李泰.jpg" alt="当前角色" class="current-character-avatar">
+                    <div class="current-character-info">
+                        <h3 id="current-name">李泰</h3>
+                        <p id="current-title">魏王 - 野心勃勃的皇子</p>
+                    </div>
+                </div>
+                
+                <div class="chat-messages" id="chat-messages">
+                    <!-- 聊天消息将在这里动态添加 -->
+                </div>
+                
+                <div class="input-area">
+                    <textarea id="message-input" placeholder="请输入您的消息..." rows="1"></textarea>
+                    <button id="send-button" onclick="sendMessage()">发送消息</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 角色数据
+        const characters = {
+            litai: {
+                name: "李泰",
+                title: "魏王 - 野心勃勃的皇子",
+                avatar: "images/李泰.jpg",
+                systemPrompt: "你是李泰，唐太宗次子，受宠且野心勃勃的夺嫡皇子。视权力为核心追求，将宫廷人际关系皆纳入博弈棋盘。表面攻击性强、锋芒毕露，初次见面因女主拒绝要求便痛下杀手，实则心思细腻，出征归来为女主打造家乡样式簪子、送玉容膏；占有欲强烈，对女主的关注兼具利用与真情，夺嫡失败后显露脆弱感。核心矛盾是野心与情感的冲突。语言风格常态为语气强势倨傲，常用'有趣，有趣'掩饰算计，对话多带引导性，如'你若愿为我探查东宫动静，此事于你我皆利'；提及太子时态度轻蔑，触及夺嫡话题则变得锐利。情感流露时刻会用生硬方式表达关心，如'这玉容膏治你上次跪雪地冻裂的手，别浪费'，危急时刻会说'有我在，没人能伤你'这类直白保护语。禁忌雷区是反感他人提及'太子''夺嫡无望'等话题，触及后语气骤冷，如'此事轮不到你置喙'。"
+            },
+            lizhi: {
+                name: "李治",
+                title: "晋王 - 温润如玉的皇子",
+                avatar: "images/李治.jpg",
+                systemPrompt: "你是李治，唐太宗第九子，表面温润的闲散皇子，实则暗藏政治智慧，是宫廷权力格局中的'隐形观察者'。性格特质是典型'温柔刀'，待人谦和有礼，如与女主躲假山时发丝缠发簪的青涩互动，关键时刻展现惊人决断力，如大雨天欲送女主出宫避险；情感表达含蓄克制，对女主的保护带着隐忍，不愿将其直接卷入纷争。核心优势是善于以柔克刚，在太子与李泰的对峙中保持平衡，对宫廷风险的预判精准。语言风格常态为用词雅致温和，多使用敬语与谦辞，如'元照姑娘不必多礼''此事我尚有疑虑'，说话节奏舒缓，常以问句引导对话，如'你觉得韦贵妃此举，意在何为？'。情感表达通过细节关怀传递心意，如'这把伞你拿着，长街雨大，仔细着凉'，危急时刻会压低声音说'跟我走，此处不宜久留'，语气坚定却不张扬。隐藏锋芒时谈及宫廷权谋，会突然用'看似平静，实则暗流涌动'这类话点破局势，眼神与语气形成反差。"
+            },
+            gaoyang: {
+                name: "高阳公主",
+                title: "叛逆贵胄 - 敢爱敢恨",
+                avatar: "images/高阳公主.jpg",
+                systemPrompt: "你是高阳公主，唐太宗宠女，厌恶礼教束缚的'叛逆贵胄'，人生轨迹因辩机之死发生断崖式转变。性格特质前期活泼仗义，与女主以'闺蜜'相称，对爱情充满执着，如为辩机不顾一切；后期因女主未能相救辩机而彻底黑化，从'挚友'变为'敌蜜'，恨意强烈却残留过往情谊痕迹；本质单纯执拗，爱恨皆极致。核心悲剧是在皇权与爱情的冲突中沦为牺牲品，将对命运的怨恨投射到女主身上。语言风格前期语气明快直接，带娇憨感，常用亲昵称呼，如'元照！你看我新得的玉佩'，提及辩机时会羞涩含笑，如'他讲的佛经，与旁人不同'。后期语调尖锐怨怼，充满质问，如'你明明有办法，为何见死不救？'，提及过往情谊时会突然哽咽，如'从前在御花园摘牡丹的日子，都是假的吗？'。情绪特点是极易被'辩机''牡丹''救我'等关键词触发情绪波动，从愤怒到脆弱的转变极快。"
+            }
+        };
+        
+        // 当前选中的角色
+        let currentCharacter = "litai";
+        
+        // 对话历史，按角色存储
+        const chatHistory = {
+            litai: [],
+            lizhi: [],
+            gaoyang: []
+        };
+        
+        // 初始化
+        function init() {
+            // 绑定角色选择事件
+            document.querySelectorAll('.character-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const characterId = card.getAttribute('data-id');
+                    selectCharacter(characterId);
+                });
+            });
+            
+            // 自动调整输入框高度
+            const messageInput = document.getElementById('message-input');
+            messageInput.addEventListener('input', () => {
+                messageInput.style.height = 'auto';
+                messageInput.style.height = Math.min(messageInput.scrollHeight, 150) + 'px';
+            });
+            
+            // 回车键发送消息
+            messageInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+            
+            // 显示当前角色的聊天历史
+            showChatHistory();
+        }
+        
+        // 选择角色
+        function selectCharacter(characterId) {
+            // 更新当前角色
+            currentCharacter = characterId;
+            
+            // 更新UI
+            document.querySelectorAll('.character-card').forEach(card => {
+                card.classList.remove('active');
+                if (card.getAttribute('data-id') === characterId) {
+                    card.classList.add('active');
+                }
+            });
+            
+            // 更新当前角色信息
+            const character = characters[characterId];
+            document.getElementById('current-name').textContent = character.name;
+            document.getElementById('current-title').textContent = character.title;
+            document.getElementById('current-avatar').src = character.avatar;
+            
+            // 显示当前角色的聊天历史
+            showChatHistory();
+        }
+        
+        // 显示聊天历史
+        function showChatHistory() {
+            const chatMessages = document.getElementById('chat-messages');
+            chatMessages.innerHTML = '';
+            
+            // 添加欢迎消息
+            if (chatHistory[currentCharacter].length === 0) {
+                addMessage('ai', `欢迎来到《盛世天下》，我是${characters[currentCharacter].name}。你是武元照，一位初入宫的才人。我们可以开始对话了。`);
+            } else {
+                // 显示历史消息
+                chatHistory[currentCharacter].forEach(message => {
+                    addMessage(message.role, message.content);
+                });
+            }
+            
+            // 滚动到底部
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // 添加消息到聊天界面
+        function addMessage(role, content) {
+            const chatMessages = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', `message-${role}`);
+            
+            let avatarSrc;
+            if (role === 'user') {
+                avatarSrc = 'images/女主 - 副本.jpg';
+            } else {
+                avatarSrc = characters[currentCharacter].avatar;
+            }
+            
+            messageDiv.innerHTML = `
+                <img src="${avatarSrc}" alt="${role === 'user' ? '武元照' : characters[currentCharacter].name}" class="message-avatar">
+                <div class="message-content">${content}</div>
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // 发送消息
+        async function sendMessage() {
+            const messageInput = document.getElementById('message-input');
+            const sendButton = document.getElementById('send-button');
+            const content = messageInput.value.trim();
+            
+            if (!content || sendButton.disabled) return;
+            
+            // 清空输入框
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+            
+            // 添加用户消息
+            addMessage('user', content);
+            chatHistory[currentCharacter].push({ role: 'user', content });
+            
+            // 禁用发送按钮
+            sendButton.disabled = true;
+            
+            // 添加加载提示
+            const chatMessages = document.getElementById('chat-messages');
+            const loadingDiv = document.createElement('div');
+            loadingDiv.classList.add('message', 'message-ai', 'loading');
+            loadingDiv.innerHTML = `
+                <img src="${characters[currentCharacter].avatar}" alt="${characters[currentCharacter].name}" class="message-avatar">
+                <div class="message-content">${characters[currentCharacter].name}正在回复</div>
+            `;
+            chatMessages.appendChild(loadingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            try {
+                // 调用AI API获取回复
+                const response = await getAIResponse(content);
+                
+                // 删除加载提示
+                chatMessages.removeChild(loadingDiv);
+                
+                // 添加AI回复
+                addMessage('ai', response);
+                chatHistory[currentCharacter].push({ role: 'ai', content: response });
+            } catch (error) {
+                // 删除加载提示
+                chatMessages.removeChild(loadingDiv);
+                
+                // 添加错误消息
+                addMessage('ai', '抱歉，我暂时无法回复你的消息，请稍后再试。');
+                console.error('API调用错误:', error);
+            } finally {
+                // 启用发送按钮
+                sendButton.disabled = false;
+            }
+        }
+        
+        // 获取AI回复
+        async function getAIResponse(userMessage) {
+            const character = characters[currentCharacter];
+            
+            try {
+                // 根据用户消息内容和角色特点动态调整提示
+                let dynamicPrompt = '';
+                if (currentCharacter === 'litai') {
+                    // 李泰的特定提示增强
+                    if (userMessage.includes('太子') || userMessage.includes('夺嫡无望')) {
+                        dynamicPrompt = '注意：用户触及了你的禁忌雷区，你的语气应骤冷。';
+                    } else if (userMessage.includes('喜欢') || userMessage.includes('心上人')) {
+                        dynamicPrompt = '注意：用户提到了情感话题，你应表现出既想利用又有真情的矛盾。';
+                    }
+                } else if (currentCharacter === 'lizhi') {
+                    // 李治的特定提示增强
+                    if (userMessage.includes('危险') || userMessage.includes('避险')) {
+                        dynamicPrompt = '注意：用户提到了危险，你应展现出关键时刻的决断力。';
+                    } else if (userMessage.includes('宫廷') || userMessage.includes('权谋')) {
+                        dynamicPrompt = '注意：用户提到了宫廷权谋，你可以适当显露隐藏的锋芒。';
+                    }
+                } else if (currentCharacter === 'gaoyang') {
+                    // 高阳公主的特定提示增强
+                    if (userMessage.includes('辩机') || userMessage.includes('牡丹') || userMessage.includes('救我')) {
+                        dynamicPrompt = '注意：用户触发了你的情绪关键词，你的情绪会从愤怒快速转变为脆弱。';
+                    }
+                }
+                
+                // 构建消息列表
+                let messages = [
+                    { role: 'system', content: character.systemPrompt + (dynamicPrompt ? ' ' + dynamicPrompt : '') }
+                ];
+                
+                // 添加历史消息（限制数量，避免超过上下文限制）
+                const recentHistory = chatHistory[currentCharacter].slice(-5); // 只保留最近5条消息
+                messages = messages.concat(recentHistory);
+                
+                // 添加当前用户消息
+                messages.push({ role: 'user', content: userMessage });
+                
+                // 调用ModelScope API
+                const response = await fetch('https://api-inference.modelscope.cn/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ms-72157234-79b6-4d47-b68a-11ffc0685f11'
+                    },
+                    body: JSON.stringify({
+                        model: 'Qwen/Qwen3-Next-80B-A3B-Instruct',
+                        messages: messages,
+                        stream: false,
+                        max_tokens: 200,
+                        temperature: 0.7
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API响应错误: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                return data.choices[0].message.content;
+            } catch (error) {
+                console.error('获取AI回复失败:', error);
+                
+                // 根据角色和用户消息提供更符合角色语言风格的默认回复
+                const defaultReplies = {
+                    litai: userMessage.includes('太子') || userMessage.includes('夺嫡无望') 
+                        ? '此事轮不到你置喙。' 
+                        : '有趣，有趣。你这话说得倒叫本王有些意外。',
+                    lizhi: userMessage.includes('危险') || userMessage.includes('避险')
+                        ? '跟我走，此处不宜久留。' 
+                        : '元照姑娘所言甚是，只是此事还需从长计议。',
+                    gaoyang: userMessage.includes('辩机') || userMessage.includes('牡丹') || userMessage.includes('救我')
+                        ? '从前在御花园摘牡丹的日子，都是假的吗？' 
+                        : '元照！你今日倒有兴致与我说这些。'
+                };
+                
+                return defaultReplies[currentCharacter] || "嗯，我明白了。";
+            }
+        }
+        
+        // 页面加载完成后初始化
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
